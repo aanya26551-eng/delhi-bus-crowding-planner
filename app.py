@@ -76,7 +76,7 @@ def load_data():
 
 meta, df = load_data()
 
-# Ensure required columns exist safely
+# Ensure required columns and clean data types safely
 for col, default_val in [
     ("route", "8UP"),
     ("hour", 18),
@@ -90,6 +90,14 @@ for col, default_val in [
 ]:
     if col not in df.columns:
         df[col] = default_val
+
+df["is_weekend"] = (
+    df["is_weekend"].astype(str).str.strip().str.lower().isin(["true", "1", "yes"])
+)
+df["hour"] = pd.to_numeric(df["hour"], errors="coerce").fillna(18).astype(int)
+df["tickets"] = pd.to_numeric(df["tickets"], errors="coerce").fillna(100).astype(int)
+df["avg_trip_load_est"] = pd.to_numeric(df["avg_trip_load_est"], errors="coerce").fillna(45.0)
+df["ac_share"] = pd.to_numeric(df["ac_share"], errors="coerce").fillna(0.5)
 
 st.title("🚌 Delhi Bus Crowding-Aware Journey Planner")
 st.caption(
@@ -138,7 +146,7 @@ with tab1:
             "Route": row["route"],
             "Departure": f"{dep_hour:02d}:00",
             "Est. Travel Time (min)": est_mins,
-            "Est. Passengers On Board": float(row["avg_trip_load_est"]),
+            "Est. Passengers On Board": round(float(row["avg_trip_load_est"]), 1),
             "Crowding Level": str(row["crowding_level"]),
             "AC Bus Share": f"{int(float(row['ac_share'])*100)}%",
             "Reliability": "⚠️ Low Sample" if bool(row["low_confidence"]) else "✅ High Confidence",
@@ -151,7 +159,7 @@ with tab1:
             "Route": r_lat["route"],
             "Departure": f"{later_hour:02d}:00",
             "Est. Travel Time (min)": 46,
-            "Est. Passengers On Board": float(r_lat["avg_trip_load_est"]),
+            "Est. Passengers On Board": round(float(r_lat["avg_trip_load_est"]), 1),
             "Crowding Level": str(r_lat["crowding_level"]),
             "AC Bus Share": f"{int(float(r_lat['ac_share'])*100)}%",
             "Reliability": "⚠️ Low Sample" if bool(r_lat["low_confidence"]) else "✅ High Confidence",
@@ -200,8 +208,6 @@ with tab2:
     st.plotly_chart(fig, use_container_width=True)
 
     st.markdown("### Top Overloaded Route-Hours (Where Extra Buses Help Most)")
-    overloaded = df[~df["is_weekend"]].sort_values("avg_trip_load_est", ascending=False).head(10)[
-        ["route", "hour", "tickets", "avg_trip_load_est", "crowding_level", "low_confidence"]
-    ]
+    avail_cols = [c for c in ["route", "hour", "tickets", "avg_trip_load_est", "crowding_level", "low_confidence"] if c in df.columns]
+    overloaded = df[~df["is_weekend"]].sort_values("avg_trip_load_est", ascending=False).head(10)[avail_cols]
     st.dataframe(overloaded, use_container_width=True)
-
