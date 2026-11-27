@@ -1,0 +1,17 @@
+Project Title: Crowdedness-Aware Journey Planner for Delhi Buses
+
+Problem Statement:
+
+Standard public transit journey planners rank routes primarily by travel time and number of transfers, overlooking how crowded a bus actually is. For commuters travelling on Delhi buses during busy hours, boarding an already packed bus can mean long waits, uncomfortable standing conditions, or missed buses—while transit planners and operators need a clear view of which route-hours experience severe load spikes.
+
+Solution & Phase 1 Prototype:
+
+We built an end-to-end Phase 1 prototype connecting a reproducible Python data pipeline (pipeline.py) to a live interactive Streamlit web application (app.py):
+
+Commuter Journey Planner: Lets users enter origin and destination stops, choose a departure hour and weekday vs. weekend, and pick a priority (Balanced, Most Comfortable (Seats), or Fastest Time). It compares candidate options across estimated travel time, estimated riders on board, crowding status (Seats Available, Standing Room, Crowded), AC share, and sample reliability indicators.
+
+Bus Operator & Planner View: Plots hourly weekday vs. weekend passenger load curves against crowding thresholds and highlights top overloaded route-hours to help planners spot bottlenecks.
+
+Phase 2 Roadmap:
+
+In Phase 2, we plan to incorporate static GTFS stop sequences to compute segment-level running load (boardings - alightings), calibrate pass-holder/pink-ticket expansion factors and vehicle capacities (9m vs. 12m, AC vs. non-AC), and integrate live GTFS-Realtime positions where available.
