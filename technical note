@@ -1,0 +1,21 @@
+Pipeline & Crowding Estimation:
+
+pipeline.py processes the October 2026 Delhi ticketing CSV in 250,000-row chunks to keep memory usage low, normalizes route and timestamp fields, extracts hour-of-day (IST) and weekday vs. weekend flags, and aggregates ticket counts and passenger_count sums by route, hour, and day type. Because aggregate ticket summaries do not directly observe un-ticketed pass holders or exact per-trip headways, we apply a transparent 1.25x rider scaling factor to estimate ridership and categorize crowding into three tiers:
+
+Seats Available: < 40 estimated riders
+
+Standing Room: 40–65 estimated riders
+
+Crowded: > 65 estimated riders
+
+Assumptions, Edge Cases & Limitations:
+
+Ticketed Proxy: Ticketed passenger_count serves as a demand proxy where pass holders or unrecorded boardings are not explicitly separated.
+
+Stop-Level Alighting: end_stop_name reflects planned trip end rather than observed alighting stop, so stop-by-stop running load (boardings - alightings) is deferred to Phase 2 GTFS segment integration.
+
+Fleet & Capacity Differences: Actual seating and standing capacity varies across 9m vs. 12m and AC vs. non-AC buses.
+
+Low-Sample Flag: Route-hours with small ticket counts (tickets < 30) are tagged with a low_confidence (⚠️ Low Sample) indicator.
+
+Time Window: A single-month snapshot (October 2026) captures recurring weekly patterns but not seasonal, weather, or special-event shifts.
